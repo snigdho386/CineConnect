@@ -25,7 +25,7 @@ A comprehensive movie booking system built with Spring Boot that allows users to
 - Spring Boot Starter Web
 - Spring Boot Starter Data JPA
 - Spring Boot Starter Mail
-- MySQL Connector
+- Postgres 17 & PgAdmin
 - Lombok
 - SpringDoc OpenAPI UI
 
@@ -48,18 +48,19 @@ cd bookmyshow-application
 
 ### 2. Database Configuration
 
-Create a database named `cinemaDB` in your MySQL server.
+Create a database named `cinemaDB` in your Postgres server.
 
 The application is configured with the following database settings in `application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/cinemaDB?createTableIfNotExist=true
-spring.datasource.username=root
-spring.datasource.password=admin
+spring.application.name= movie-engine
+spring.datasource.url=jdbc:postgresql://localhost:5432/cinemadb
+spring.datasource.username=postgres
+spring.datasource.password=ROOT_PASSWORD
+spring.datasource.driver-class-name=org.postgresql.Driver
 spring.jpa.hibernate.ddl-auto=update
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 ```
-
-**Note**: Update the username and password according to your MySQL configuration.
 
 ### 3. Build and Run
 
@@ -162,18 +163,13 @@ src/
 Key configuration options in `application.properties`:
 
 ```properties
-# Server Configuration
-spring.application.name=book-my-show-application
-
-# Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/cinemaDB?createTableIfNotExist=true
-spring.datasource.username=root
-spring.datasource.password=admin
+spring.application.name= movie-engine
+spring.datasource.url=jdbc:postgresql://localhost:5432/cinemadb
+spring.datasource.username=postgres
+spring.datasource.password=8250
+spring.datasource.driver-class-name=org.postgresql.Driver
 spring.jpa.hibernate.ddl-auto=update
-
-# API Documentation
-springdoc.api-docs.path=/api-docs
-springdoc.swagger-ui.path=/swagger-ui.html
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 ```
 
 ## 🧪 Testing
