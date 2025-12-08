@@ -6,6 +6,9 @@ import com.cineconnect.movieengine.Repository.*;
 import com.cineconnect.movieengine.Requests.BookTicketRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +38,7 @@ public class TicketService {
     @Autowired
     private SeatSelectionRepository seatSelectionRepository;
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Ticket bookTicket(BookTicketRequest bookTicketRequest) throws Exception{
 
         // Get the show and check temporary seat selections
