@@ -26,6 +26,9 @@ public class ShowSeat {
     private Integer price;
     private Boolean isAvailable;
 
+    @Version
+    private Integer version;
+
     @ManyToOne
     @JoinColumn
     private Show show;
