@@ -31,13 +31,13 @@ public class TicketService {
     @Autowired
     private TicketRepository ticketRepository;
 
-    // NEW: Add SeatSelectionRepository
+    // SeatSelectionRepository for managing temporary seat selections
     @Autowired
     private SeatSelectionRepository seatSelectionRepository;
 
     public Ticket bookTicket(BookTicketRequest bookTicketRequest) throws Exception{
 
-        // NEW: First, get the show and check temporary seat selections
+        // Get the show and check temporary seat selections
         Movie movie = movieRepository.findMovieByMovieName(bookTicketRequest.getMovieName());
         Theater theater = theaterRepository.findById(bookTicketRequest.getTheaterId()).get();
 
@@ -49,7 +49,7 @@ public class TicketService {
                 theater
         );
 
-        // NEW: Check if seats are temporarily selected by the user
+        // Check if seats are temporarily selected by the user
         Date cutoffTime = new Date(System.currentTimeMillis() - 10 * 60 * 1000); // 10 minutes ago
         List<SeatSelection> userTempSelections = seatSelectionRepository.findByShowAndStatusAndCreatedAtAfter(
                 show, "TEMP", cutoffTime
@@ -60,12 +60,12 @@ public class TicketService {
                 .map(SeatSelection::getSeatNo)
                 .collect(Collectors.toList());
 
-        // NEW: Verify requested seats match temp selections (Optional - you can remove this check if you want to allow direct booking)
+        // Verify requested seats match temp selections
         if (!userSelectedSeats.containsAll(bookTicketRequest.getRequestedSeats())) {
             throw new SeatUnavailableException("Please select seats first through the seat selection interface. Some requested seats are not in your temporary selection.");
         }
 
-        // EXISTING CODE: Calculate the total cost of the tickets
+        // Calculate the total cost of the tickets
         Integer showId = show.getShowId();
         List<ShowSeat> showSeatList = showSeatRepository.findShowSeats(showId);
 
@@ -90,7 +90,7 @@ public class TicketService {
             throw new SeatUnavailableException("The requested Seats are unavailable");
         }
 
-        // EXISTING CODE: Make the seats booked:(Only if seats are available : otherwise throw exception)
+        // Make the seats booked (only if seats are available, otherwise throw exception)
         for(String seatNo:bookTicketRequest.getRequestedSeats()) {
             for(ShowSeat showSeat:showSeatList) {
                 if(showSeat.getSeatNo().equals(seatNo))
@@ -100,12 +100,12 @@ public class TicketService {
             }
         }
 
-        // EXISTING CODE: Save updated show seats
+        // Save updated show seats
         showSeatRepository.saveAll(showSeatList);
 
         User user = userRepository.findUserByMobNo(bookTicketRequest.getMobNo());
 
-        // EXISTING CODE: Save the ticketEntity
+        // Create and save the ticket
         Ticket ticket = Ticket.builder()
                 .user(user)
                 .movieName(bookTicketRequest.getMovieName())
@@ -117,7 +117,7 @@ public class TicketService {
 
         ticket = ticketRepository.save(ticket);
 
-        // NEW: After successful booking, update temp selections to CONFIRMED and clean up
+        // Update temp selections to CONFIRMED after successful booking
         for (SeatSelection selection : userTempSelections) {
             if (bookTicketRequest.getRequestedSeats().contains(selection.getSeatNo())
                     && selection.getUserMobNo().equals(bookTicketRequest.getMobNo())) {
@@ -126,7 +126,7 @@ public class TicketService {
             }
         }
 
-        // NEW: Clean up any other temporary selections for these seats from other users
+        // Clean up any other temporary selections for these seats from other users
         List<SeatSelection> allTempSelections = seatSelectionRepository.findByShowAndStatusAndCreatedAtAfter(
                 show, "TEMP", cutoffTime
         );
